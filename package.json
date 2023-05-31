@@ -1,6 +1,6 @@
 {
   "name": "chroma-harmony",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A minimal Color Harmony library built on top of [Chroma.js](https://www.npmjs.com/package/chroma-js)",
   "type": "module",
   "main": "dist/index.js",
@@ -30,13 +30,14 @@
   },
   "homepage": "https://github.com/Beilinson/chroma-harmony.js#readme",
   "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.3",
     "rimraf": "^5.0.0",
     "rollup": "^3.21.0",
     "rollup-plugin-dts": "^5.3.0",
     "tslib": "^2.5.0",
     "typescript": "^5.0.4"
   },
-  "dependencies": {
+  "peerDependencies": {
     "@types/chroma-js": "^2.4.0",
     "chroma-js": "^2.4.2"
   }

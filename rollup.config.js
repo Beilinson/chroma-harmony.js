@@ -1,4 +1,6 @@
 import dts from 'rollup-plugin-dts'; 
+import terser from '@rollup/plugin-terser';
+
 const watchFiles = ['lib/**'];
 
 export default [
@@ -13,6 +15,7 @@ export default [
     watch: {
       include: watchFiles,
     },
+    plugins: [terser()],
   },
   {
     input: './lib/index.d.ts',
