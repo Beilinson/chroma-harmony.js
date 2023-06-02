@@ -9,6 +9,10 @@ Use it in order to quickly generate [sequential, diverging, or qualitative](http
 Or Generate more general color palettes using simple color harmonies like complementary or analogous:
 ![A table of 7 Color Harmonies](https://raw.githubusercontent.com/beilinson/chroma-harmony.js/main/assets/seven-color-harmonies.jpg)
 
+## Color Spaces
+Since this library uses `chroma-js` objects for color manipulations, we gain full advantage of advanced
+color spaces for manipulating colors to generate automatic color palettes.
+
 ## Install
 First install the `chroma-js` peer-dependency:
 ```

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<title>Chroma-Harmony Visualizer</title>
+		<meta name="description" content="" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link href="https://unpkg.com/css.gg@2.0.0/icons/css/moon.css" rel="stylesheet" />
+		<link href="https://unpkg.com/css.gg@2.0.0/icons/css/sun.css" rel="stylesheet" />
+		<style>
+			:root {
+				--border-radius: 10px;
+				--side-margin: 30px;
+				--bottom-margin: 30px;
+				--main-color: red;
+			}
+
+			[data-theme='dark'] {
+				--bg-color: #111;
+				--color: white;
+			}
+
+			[data-theme='light'] {
+				--bg-color: #eee;
+				--color: black;
+			}
+
+			*,
+			*:before,
+			*:after {
+				box-sizing: border-box;
+			}
+
+			* {
+				color: var(--color);
+				white-space: nowrap;
+			}
+
+			div {
+				display: flex;
+				flex-grow: 1;
+			}
+
+			p {
+				text-align: center;
+				margin: 10px;
+			}
+
+			label {
+				font-family: system-ui, sans-serif;
+				line-height: 1.1;
+				display: grid;
+				grid-template-columns: 1em auto;
+				gap: 0.5em;
+			}
+
+			input[type='radio'] {
+				appearance: none;
+				margin: 0;
+				background-color: var(--bg-color);
+				font: inherit;
+				color: currentColor;
+				width: 1.15em;
+				height: 1.15em;
+				border: 0.15em solid currentColor;
+				border-radius: 50%;
+				transform: translateY(-0.075em);
+				display: grid;
+				place-content: center;
+			}
+
+			input[type='radio']::before {
+				content: '';
+				width: 0.65em;
+				height: 0.65em;
+				border-radius: 50%;
+				transform: scale(0);
+				transition: 100ms transform ease-out;
+				box-shadow: inset 1em 1em var(--main-color);
+			}
+
+			input[type='radio']:checked::before {
+				transform: scale(1);
+			}
+
+			html,
+			body {
+				background-color: var(--bg-color);
+				overflow: hidden;
+				font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
+					'Helvetica Neue', sans-serif;
+				height: 100%;
+				padding: 0;
+				margin: 0;
+			}
+
+			body {
+				display: grid;
+				grid-template-columns: 1fr 5fr 1fr;
+				grid-template-rows: 0.5fr 6fr 2fr;
+				grid-template-areas:
+					'header header header'
+					'menu main right'
+					'menu footer right';
+				gap: 10px;
+			}
+
+			#header {
+				padding: 0 var(--side-margin);
+				background-color: black;
+				grid-area: header;
+				display: grid;
+				grid-template-columns: 1fr 5fr 1fr;
+				color: white;
+			}
+
+			#title {
+				background: linear-gradient(65deg, #a683e3 10%, #e4e9fd 100%);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+			}
+
+			#demos {
+				justify-content: center;
+				align-items: center;
+			}
+
+			#demos > svg {
+				cursor: pointer;
+				margin: 0 15px;
+			}
+
+			#settings {
+				padding: 0 var(--side-margin);
+				justify-content: center;
+				align-items: center;
+			}
+
+			#settings > i {
+				color: white;
+				cursor: pointer;
+			}
+
+			#options,
+			#harmonies {
+				display: flex;
+				flex-direction: column;
+				justify-content: space-evenly;
+				margin: 10px;
+			}
+
+			#harmonies {
+				grid-area: menu;
+				padding-left: var(--side-margin);
+			}
+
+			#harmonies > div {
+				flex-grow: 0;
+			}
+
+			#example {
+				grid-area: main;
+			}
+
+			#options {
+				grid-area: right;
+				padding-right: var(--side-margin);
+			}
+
+			#canvas-bin {
+				display: flex;
+				grid-area: footer;
+				--border: black 2px solid;
+			}
+
+			#canvas-bin > div > div {
+				border-top: var(--border);
+				border-bottom: var(--border);
+			}
+
+			#canvas-bin > div:first-child > div {
+				border-top-left-radius: var(--border-radius);
+				border-bottom-left-radius: var(--border-radius);
+				border-left: var(--border);
+			}
+
+			#canvas-bin > div:last-child > div {
+				border-top-right-radius: var(--border-radius);
+				border-bottom-right-radius: var(--border-radius);
+				border-right: var(--border);
+			}
+		</style>
+
+		<script type="module" src="https://cdn.jsdelivr.net/npm/chroma-js"></script>
+		<script type="module" src="https://cdn.jsdelivr.net/npm/color-picker-web-component"></script>
+		<script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
+	</head>
+	<body>
+		<div id="header">
+			<h2 id="title">chroma-harmony.js</h2>
+			<div id="demos">
+				<svg id="bar" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="24" height="24">
+					<!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+					<path
+						fill="white"
+						d="M160 80c0-26.5 21.5-48 48-48h32c26.5 0 48 21.5 48 48V432c0 26.5-21.5 48-48 48H208c-26.5 0-48-21.5-48-48V80zM0 272c0-26.5 21.5-48 48-48H80c26.5 0 48 21.5 48 48V432c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V272zM368 96h32c26.5 0 48 21.5 48 48V432c0 26.5-21.5 48-48 48H368c-26.5 0-48-21.5-48-48V144c0-26.5 21.5-48 48-48z"
+					/>
+				</svg>
+				<svg id="pie" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="24" height="24">
+					<!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+					<path
+						fill="white"
+						d="M304 240V16.6c0-9 7-16.6 16-16.6C443.7 0 544 100.3 544 224c0 9-7.6 16-16.6 16H304zM32 272C32 150.7 122.1 50.3 239 34.3c9.2-1.3 17 6.1 17 15.4V288L412.5 444.5c6.7 6.7 6.2 17.7-1.5 23.1C371.8 495.6 323.8 512 272 512C139.5 512 32 404.6 32 272zm526.4 16c9.3 0 16.6 7.8 15.4 17c-7.7 55.9-34.6 105.6-73.9 142.3c-6 5.6-15.4 5.2-21.2-.7L320 288H558.4z"
+					/>
+				</svg>
+				<svg id="map" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="24" height="24">
+					<!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+					<path
+						fill="white"
+						d="M383.8 351.7c2.5-2.5 105.2-92.4 105.2-92.4l-17.5-7.5c-10-4.9-7.4-11.5-5-17.4 2.4-7.6 20.1-67.3 20.1-67.3s-47.7 10-57.7 12.5c-7.5 2.4-10-2.5-12.5-7.5s-15-32.4-15-32.4-52.6 59.9-55.1 62.3c-10 7.5-20.1 0-17.6-10 0-10 27.6-129.6 27.6-129.6s-30.1 17.4-40.1 22.4c-7.5 5-12.6 5-17.6-5C293.5 72.3 255.9 0 255.9 0s-37.5 72.3-42.5 79.8c-5 10-10 10-17.6 5-10-5-40.1-22.4-40.1-22.4S183.3 182 183.3 192c2.5 10-7.5 17.5-17.6 10-2.5-2.5-55.1-62.3-55.1-62.3S98.1 167 95.6 172s-5 9.9-12.5 7.5C73 177 25.4 167 25.4 167s17.6 59.7 20.1 67.3c2.4 6 5 12.5-5 17.4L23 259.3s102.6 89.9 105.2 92.4c5.1 5 10 7.5 5.1 22.5-5.1 15-10.1 35.1-10.1 35.1s95.2-20.1 105.3-22.6c8.7-.9 18.3 2.5 18.3 12.5S241 512 241 512h30s-5.8-102.7-5.8-112.8 9.5-13.4 18.4-12.5c10 2.5 105.2 22.6 105.2 22.6s-5-20.1-10-35.1 0-17.5 5-22.5z"
+					/>
+				</svg>
+			</div>
+			<div id="settings">
+				<i id="light-dark">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="24" height="24">
+						<!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+						<path
+							fill="white"
+							d="M223.5 32C100 32 0 132.3 0 256S100 480 223.5 480c60.6 0 115.5-24.2 155.8-63.4c5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-9.8 1.7-19.8 2.6-30.1 2.6c-96.9 0-175.5-78.8-175.5-176c0-65.8 36-123.1 89.3-153.3c6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-6.3-.5-12.6-.8-19-.8z"
+						/>
+					</svg>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="24" height="24" style="display: none">
+						<!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+						<path
+							fill="white"
+							d="M361.5 1.2c5 2.1 8.6 6.6 9.6 11.9L391 121l107.9 19.8c5.3 1 9.8 4.6 11.9 9.6s1.5 10.7-1.6 15.2L446.9 256l62.3 90.3c3.1 4.5 3.7 10.2 1.6 15.2s-6.6 8.6-11.9 9.6L391 391 371.1 498.9c-1 5.3-4.6 9.8-9.6 11.9s-10.7 1.5-15.2-1.6L256 446.9l-90.3 62.3c-4.5 3.1-10.2 3.7-15.2 1.6s-8.6-6.6-9.6-11.9L121 391 13.1 371.1c-5.3-1-9.8-4.6-11.9-9.6s-1.5-10.7 1.6-15.2L65.1 256 2.8 165.7c-3.1-4.5-3.7-10.2-1.6-15.2s6.6-8.6 11.9-9.6L121 121 140.9 13.1c1-5.3 4.6-9.8 9.6-11.9s10.7-1.5 15.2 1.6L256 65.1 346.3 2.8c4.5-3.1 10.2-3.7 15.2-1.6zM160 256a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zm224 0a128 128 0 1 0 -256 0 128 128 0 1 0 256 0z"
+						/>
+					</svg>
+				</i>
+			</div>
+		</div>
+		<div id="harmonies">
+			<label>
+				<input type="radio" name="palette" value="sequential" checked />
+				Sequential
+			</label>
+			<label>
+				<input type="radio" name="palette" value="diverging" />
+				Diverging
+			</label>
+			<label>
+				<input type="radio" name="palette" value="qualitative" />
+				Qualitative
+			</label>
+			<label>
+				<input type="radio" name="palette" value="complementary" />
+				Complementary
+			</label>
+			<label>
+				<input type="radio" name="palette" value="splitComplementary" />
+				Split-Complementary
+			</label>
+			<label>
+				<input type="radio" name="palette" value="triadic" />
+				Triadic
+			</label>
+			<label>
+				<input type="radio" name="palette" value="tetradic" />
+				Tetradic
+			</label>
+			<label>
+				<input type="radio" name="palette" value="square" />
+				Square
+			</label>
+			<label>
+				<input type="radio" name="palette" value="analogous" />
+				Analogous
+			</label>
+		</div>
+		<div id="example"></div>
+		<div id="options">
+			<color-picker id="color-input" value="#ff0000" formats="hex,rgb,hsl,hsv" selectedformat="hex"></color-picker>
+			<label>
+				<select id="color-space-input">
+					<option value="hsl">HSL</option>
+					<option value="hsv">HSV</option>
+					<option value="rgb">RGB</option>
+					<option value="lch">LCH</option>
+					<option value="lab">LAB</option>
+				</select>
+				Interpolation Mode
+			</label>
+			<input type="range" id="subdivision-input" min="2" max="12" value="5" />
+			<input type="range" id="angle-input" min="10" max="170" value="15" style="display: none" />
+		</div>
+		<!-- <input type="color" id="color-input" /> -->
+		<div id="canvas-bin"></div>
+		<script>
+			let theme = 'dark';
+			const colorScheme = document.getElementById('light-dark');
+			const example = document.getElementById('example');
+
+			const toggleDisplayNone = (elm, def = 'block') => (elm.style.display = elm.style.display === 'none' ? def : 'none');
+			function detectColorScheme() {
+				//local storage is used to override OS theme settings
+				if (localStorage.getItem('theme')) {
+					theme = localStorage.getItem('theme');
+				} else if (!window.matchMedia) {
+					//matchMedia method not supported
+					return false;
+				} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+					//OS theme setting detected as dark
+					theme = 'dark';
+				} else {
+					theme = 'light';
+				}
+
+				document.documentElement.setAttribute('data-theme', theme);
+				if (theme !== 'dark') {
+					toggleDisplayNone(colorScheme.children.item(0));
+					toggleDisplayNone(colorScheme.children.item(1));
+				}
+			}
+			detectColorScheme();
+			colorScheme.addEventListener('click', (e) => {
+				theme = theme == 'dark' ? 'light' : 'dark';
+				localStorage.setItem('theme', theme);
+				document.documentElement.setAttribute('data-theme', theme);
+				toggleDisplayNone(colorScheme.children.item(0));
+				toggleDisplayNone(colorScheme.children.item(1));
+				if (example.layout)
+					Plotly.relayout(example, {
+						plot_bgcolor: theme == 'dark' ? '#111' : '#eee',
+						font: { color: theme == 'dark' ? 'white' : 'black' },
+					});
+			});
+		</script>
+		<script type="module">
+			class Harmony {
+				constructor(space = 'lab', correctLightness = false) {
+					this.space = space;
+					this.correctLightness = correctLightness;
+				}
+				/**
+				 * Generate a sequential color scale for continous data
+				 */
+				sequential(color) {
+					if (color instanceof Array) {
+						return this.scale(color.map((c) => chroma(c))).correctLightness(this.correctLightness);
+					} else {
+						const [h, s] = chroma(color).hsl();
+						return this.scale([chroma(h, s, 0.95, 'hsl'), chroma(h, s, 0.2, 'hsl')]).correctLightness(this.correctLightness);
+					}
+				}
+
+				/**
+				 * Generate a diverging color scale for when a critical data class or break point needs to be emphasized
+				 * @param color The color to be used for 'high' values
+				 */
+				diverging(color) {
+					const [h, s] = chroma(color).hsl();
+
+					return this.scale([
+						chroma(h - 180, s, 0.2, 'hsl'),
+						chroma(h - 180, s, 0.5, 'hsl'),
+						chroma(h + 90, s, 0.95, 'hsl'),
+						chroma(h, s, 0.5, 'hsl'),
+						chroma(h, s, 0.2, 'hsl'),
+					]);
+				}
+
+				qualitative(color, count) {
+					// Round up to nearest integer just in case
+					count = Math.ceil(count);
+					if (count < 2) return [chroma(color)];
+					if (count == 2)
+						return this.complementary(color)
+							.colors(2)
+							.map((c) => chroma(c));
+					if (count == 3) return this.triadic(color);
+					if (count == 4) return this.tetradic(color);
+					if (count <= 12) return this.analogous(color, count, 160);
+					return this.sequential(color)
+						.colors(count)
+						.map((c) => chroma(c));
+				}
+
+				monochromatic(color, range = 2, variation = 'tints') {
+					const chromaColor = chroma(color);
+					let monochromeScaleEnd;
+					switch (variation) {
+						case 'shades':
+							monochromeScaleEnd = chromaColor.darken(range);
+							break;
+						case 'tones':
+							monochromeScaleEnd = chromaColor.desaturate(range);
+							break;
+						case 'tints':
+							monochromeScaleEnd = chromaColor.brighten(range);
+							break;
+						default:
+							throw TypeError(`Unknown monochromatic variation ${variation}`);
+					}
+					return this.scale([chromaColor, monochromeScaleEnd]).correctLightness(this.correctLightness);
+				}
+
+				/**
+				 * Generates a complementary color palette range from the input color to the hue opposite color
+				 * @param color The color used to generate the palette
+				 * @returns a chroma {@link chroma.Scale}
+				 */
+				complementary(color) {
+					const [h, s] = chroma(color).hsl();
+
+					return this.scale([
+						chroma(h - 180, s, 0.2, 'hsl'),
+						chroma(h - 180, s, 0.5, 'hsl'),
+						//chroma(h + 90, s, 0.95, 'hsl'),
+						chroma(h, s, 0.5, 'hsl'),
+						chroma(h, s, 0.2, 'hsl'),
+					]);
+					const chromaColor = chroma(color);
+
+					const hsl = chromaColor.hsl();
+					hsl[0] += 180;
+					return this.scale([chroma(hsl, 'hsl'), chromaColor]);
+				}
+
+				/**
+				 * Generates a color palette by rotating the hue of the input color by [-angle, 0, angle]
+				 * @param color The color used to generate the palette
+				 * @returns a split complementary color palette of 3 Chroma Colors
+				 */
+				splitComplementary(color, angle = 150) {
+					const [h, s, l] = chroma(color).hsl();
+					return [chroma(h - angle, s, l, 'hsl'), chroma(color), chroma(h + angle, s, l, 'hsl')];
+				}
+
+				/**
+				 * Generates a color palette by selecting equidistant hues in the range [color.h - angle, color.h + angle]
+				 * @param color The color used to generate the palette
+				 * @returns an analogous color palette of n Chroma Colors
+				 */
+				analogous(color, count = 5, angle = 15) {
+					const startHsl = chroma(color).hsl();
+					startHsl[0] - angle;
+					const colors = [];
+					const angleInterval = (angle * 2) / count;
+					for (let i = 0; i < count; i++) {
+						const hsl = [...startHsl];
+						hsl[0] += angleInterval * i;
+						colors.push(chroma(hsl, 'hsl'));
+					}
+					return colors;
+				}
+
+				/**
+				 * Generates a color palette by rotating the hue of the input color by [-120, 0, 120]
+				 * @param color The color used to generate the palette
+				 * @returns a triadic color palette of 3 Chroma Colors
+				 */
+				triadic(color) {
+					return this.splitComplementary(color, 120);
+				}
+
+				/**
+				 * Generates a color palette by rotating the hue of the input color by [0, 60, 180, 240]
+				 * @param color The color used to generate the palette
+				 * @returns a tetradic color palette of 4 Chroma Colors
+				 */
+				tetradic(color) {
+					const chromaColor = chroma(color);
+					const [h, s, l] = chromaColor.hsl();
+
+					return [chromaColor, chroma(h + 60, s, l, 'hsl'), chroma(h + 180, s, l, 'hsl'), chroma(h + 240, s, l, 'hsl')];
+				}
+
+				/**
+				 * Generates a color palette by rotating the hue of the input color by [0, 90, 180, 270]
+				 * @param color The color used to generate the palette
+				 * @returns a square color palette of 4 Chroma Colors
+				 */
+				square(color) {
+					const chromaColor = chroma(color);
+					const [h, s, l] = chromaColor.hsl();
+
+					return [chromaColor, chroma(h + 90, s, l, 'hsl'), chroma(h + 180, s, l, 'hsl'), chroma(h + 270, s, l, 'hsl')];
+				}
+
+				scale(colors) {
+					return chroma.scale(colors).cache(false).mode(this.space);
+				}
+			}
+			const harmony = new Harmony('hsl', true);
+			let mode = 'sequential';
+			let mainColor = 'red';
+			let count = 5;
+			let angle = 15;
+			document.getElementById('color-input').addEventListener('change', (e) => {
+				mainColor = e.target.value;
+				document.querySelector(':root').style.setProperty('--main-color', mainColor);
+				updateColor();
+			});
+			const countInput = document.getElementById('subdivision-input');
+			countInput.addEventListener('change', (e) => {
+				count = e.target.value;
+				updateColor();
+			});
+			const angleInput = document.getElementById('angle-input');
+			angleInput.addEventListener('change', (e) => {
+				angle = e.target.value;
+				updateColor();
+			});
+			document.querySelectorAll('input[name="palette"]').forEach((elm) =>
+				elm.addEventListener('change', (e) => {
+					mode = e.target.value;
+					updateParams();
+					updateColor();
+				})
+			);
+			document.getElementById('color-space-input').addEventListener('change', (e) => {
+				harmony.space = e.target.value;
+				updateColor();
+			});
+			const title = document.getElementById('title');
+			const canvasBin = document.getElementById('canvas-bin');
+
+			function getParams() {
+				return harmony[mode].toString().split(')')[0].split('(')[1].split(', ');
+			}
+
+			let params;
+			let countParam;
+			let angleParam;
+			const updateParams = () => {
+				params = getParams();
+
+				countParam = mode == 'sequential' || mode == 'diverging' || mode == 'qualitative' || mode == 'complementary' || mode == 'analogous';
+				countInput.style.display = countParam ? 'flex' : 'none';
+
+				angleParam = params.find((param) => param.includes('angle'));
+				angleInput.style.display = angleParam ? 'flex' : 'none';
+
+				if (angleParam) {
+					const value = angleParam.split(' = ')[1];
+					angleInput.value = value;
+					angle = value;
+				}
+			};
+
+			const updateColor = () => {
+				let palette;
+				if (countParam && angleParam) {
+					console.log(0);
+					palette = harmony[mode](mainColor, count, angle);
+				} else if (angleParam) {
+					console.log(1);
+					palette = harmony[mode](mainColor, angle);
+				} else {
+					console.log(2);
+					palette = harmony[mode](mainColor, count);
+				}
+				console.log(palette);
+				const colors = palette instanceof Array ? palette : palette.colors(count);
+				console.log(colors);
+				canvasBin.innerHTML = '';
+				let bins = Math.min(count, colors.length);
+				for (let i = 0; i < bins; i++) {
+					const div = document.createElement('div');
+					const color = document.createElement('div');
+					const label = document.createElement('p');
+					color.style.backgroundColor = colors[i];
+					label.innerText = colors[i];
+					div.style.flexDirection = 'column';
+					div.appendChild(color);
+					div.appendChild(label);
+					canvasBin.appendChild(div);
+				}
+				title.style.background = `linear-gradient(65deg, ${colors.map((color, i) => color + ' ' + ((i + 0.5) / bins) * 100 + '%')})`;
+				title.style['-webkit-background-clip'] = 'text';
+				console.log(colors.map((color, i) => [(i + 0.5) / colors.length, color]));
+				let data = example.data;
+				console.log(data[0].y.map((x) => palette(x).hex()));
+				Plotly.update(example, {
+					marker: {
+						color: data[0].y.map((x) => palette(x).hex()),
+					},
+				});
+			};
+		</script>
+		<script>
+			const config = {
+				staticPlot: true,
+				responsive: true,
+			};
+			const setupBar = () => {
+				const x = [];
+				for (let i = 0; i < 500; i++) {
+					x[i] = Math.random();
+				}
+
+				var data = [
+					{
+						y: x,
+						type: 'bar',
+					},
+				];
+
+				const layout = {
+					xaxis: { title: 'X' },
+					yaxis: { title: 'Y' },
+					autosize: true,
+					paper_bgcolor: '#7f7f7f00',
+					plot_bgcolor: theme == 'dark' ? '#111' : '#eee',
+					font: {
+						color: theme == 'dark' ? 'white' : 'black',
+					},
+				};
+
+				Plotly.newPlot(example, data, layout, config);
+			};
+			document.getElementById('bar').addEventListener('click', setupBar);
+			setupBar();
+		</script>
+	</body>
+</html>
