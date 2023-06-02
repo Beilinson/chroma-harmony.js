@@ -1,10 +1,11 @@
 # chroma-harmony.js
 A [tiny](https://bundlephobia.com/package/chroma-harmony) TypeScript Color Harmony library built on top of [chroma-js](https://www.npmjs.com/package/chroma-js).
 
+Try out with the interactive [online editor](https://beilinson.github.io/chroma-harmony.js/visual/)
+
 ## Color Palettes
 Use it in order to quickly generate [sequential, diverging, or qualitative](https://colorbrewer2.org) brewer color scales for data visualization:
 ![A table of 7 Color Harmonies](https://raw.githubusercontent.com/beilinson/chroma-harmony.js/main/assets/brewer.png)
-
 
 Or Generate more general color palettes using simple color harmonies like complementary or analogous:
 ![A table of 7 Color Harmonies](https://raw.githubusercontent.com/beilinson/chroma-harmony.js/main/assets/seven-color-harmonies.jpg)
