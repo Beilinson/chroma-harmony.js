@@ -1,43 +1,43 @@
 {
-  "name": "chroma-harmony",
-  "version": "0.0.2",
-  "description": "A minimal Color Harmony library built on top of [Chroma.js](https://www.npmjs.com/package/chroma-js)",
-  "type": "module",
-  "main": "dist/index.js",
-  "module": "lib/index.js",
-  "typings": "lib/index.d.ts",
-  "types": "lib/index.d.ts",
-  "scripts": {
-    "build": "rimraf dist && tsc && rollup -c rollup.config.js",
-    "prepublishOnly": "npm run build"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Beilinson/chroma-harmony.js.git"
-  },
-  "keywords": [
-    "chroma",
-    "color",
-    "harmony",
-    "theory",
-    "palette"
-  ],
-  "author": "Adam Beili <adam.v.beili@gmail.com>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Beilinson/chroma-harmony.js/issues"
-  },
-  "homepage": "https://github.com/Beilinson/chroma-harmony.js#readme",
-  "devDependencies": {
-    "@rollup/plugin-terser": "^0.4.3",
-    "rimraf": "^5.0.0",
-    "rollup": "^3.21.0",
-    "rollup-plugin-dts": "^5.3.0",
-    "tslib": "^2.5.0",
-    "typescript": "^5.0.4"
-  },
-  "peerDependencies": {
-    "@types/chroma-js": "^2.4.0",
-    "chroma-js": "^2.4.2"
-  }
+	"name": "chroma-harmony",
+	"version": "0.0.3",
+	"description": "A minimal Color Harmony library built on top of [Chroma.js](https://www.npmjs.com/package/chroma-js)",
+	"type": "module",
+	"main": "dist/index.js",
+	"module": "lib/index.js",
+	"typings": "lib/index.d.ts",
+	"types": "lib/index.d.ts",
+	"scripts": {
+		"build": "rimraf dist && tsc && rollup -c rollup.config.js",
+		"prepublishOnly": "npm run build"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Beilinson/chroma-harmony.js.git"
+	},
+	"keywords": [
+		"chroma",
+		"color",
+		"harmony",
+		"theory",
+		"palette"
+	],
+	"author": "Adam Beili <adam.v.beili@gmail.com>",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/Beilinson/chroma-harmony.js/issues"
+	},
+	"homepage": "https://github.com/Beilinson/chroma-harmony.js#readme",
+	"devDependencies": {
+		"@rollup/plugin-terser": "^0.4.3",
+		"rimraf": "^5.0.0",
+		"rollup": "^3.21.0",
+		"rollup-plugin-dts": "^5.3.0",
+		"tslib": "^2.5.0",
+		"typescript": "^5.0.4"
+	},
+	"peerDependencies": {
+		"@types/chroma-js": "^2.4.0",
+		"chroma-js": "^2.4.2"
+	}
 }
