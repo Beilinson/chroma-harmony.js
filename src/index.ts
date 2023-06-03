@@ -12,7 +12,7 @@ export type Color = number | string | chroma.Color;
 export type MonochromaticVariation = 'shades' | 'tones' | 'tints';
 
 export class Harmony {
-	constructor(public space: chroma.InterpolationMode = 'lab', public correctLightness: boolean = true) {}
+	constructor(public space: chroma.InterpolationMode = 'oklch', public correctLightness: boolean = true) {}
 	/**
 	 * Generate a sequential color scale for continous data
 	 */
@@ -45,10 +45,7 @@ export class Harmony {
 		// Round up to nearest integer just in case
 		count = Math.ceil(count);
 		if (count < 2) return [chroma(color)];
-		if (count == 2)
-			return this.complementary(color)
-				.colors(2)
-				.map((c) => chroma(c));
+		if (count == 2) return [chroma(color), this.shiftHue(color, 180)];
 		if (count == 3) return this.triadic(color);
 		if (count == 4) return this.tetradic(color);
 		if (count <= 12) return this.analogous(color, count, 160);
@@ -82,14 +79,11 @@ export class Harmony {
 	 * @returns an analogous color palette of n Chroma Colors
 	 */
 	analogous(color: Color, count: number = 5, angle: number = 15): chroma.Color[] {
-		const startHsl = chroma(color).hsl();
-		startHsl[0] - angle;
-		const colors: chroma.Color[] = [];
+		const startChroma = this.shiftHue(color, -angle);
+		const colors = [];
 		const angleInterval = (angle * 2) / (count - 1);
 		for (let i = 0; i < count; i++) {
-			const hsl = [...startHsl];
-			hsl[0] += angleInterval * i;
-			colors.push(chroma(hsl, 'hsl'));
+			colors.push(this.shiftHue(startChroma, angleInterval * i));
 		}
 		return colors;
 	}
@@ -129,10 +123,7 @@ export class Harmony {
 	 * @returns a tetradic color palette of 4 Chroma Colors
 	 */
 	public tetradic(color: Color): [chroma.Color, chroma.Color, chroma.Color, chroma.Color] {
-		const chromaColor = chroma(color);
-		const [h, s, l] = chromaColor.hsl();
-
-		return [chromaColor, chroma(h + 60, s, l, 'hsl'), chroma(h + 180, s, l, 'hsl'), chroma(h + 240, s, l, 'hsl')];
+		return [chroma(color), this.shiftHue(color, 60), this.shiftHue(color, 180), this.shiftHue(color, 240)];
 	}
 
 	/**
@@ -141,15 +132,34 @@ export class Harmony {
 	 * @returns a square color palette of 4 Chroma Colors
 	 */
 	public square(color: Color): [chroma.Color, chroma.Color, chroma.Color, chroma.Color] {
-		const chromaColor = chroma(color);
-		const [h, s, l] = chromaColor.hsl();
-
-		return [chromaColor, chroma(h + 90, s, l, 'hsl'), chroma(h + 180, s, l, 'hsl'), chroma(h + 270, s, l, 'hsl')];
+		return [chroma(color), this.shiftHue(color, 90), this.shiftHue(color, 180), this.shiftHue(color, 270)];
 	}
 
 	private scale(colors: chroma.Color | chroma.Color[]): chroma.Scale {
 		// @ts-ignore
 		return chroma.scale(colors).cache(false).mode(this.space);
+	}
+
+	get colorSpace() {
+		switch (this.space) {
+			case 'lab':
+			case 'lch':
+			case 'hcl':
+				return 'lch';
+			case 'oklch':
+			case 'oklab':
+				return 'oklch';
+			default:
+				return 'hsl';
+		}
+	}
+
+	shiftHue(color: Color, angle: number) {
+		const hueIndex = this.colorSpace === 'hsl' ? 0 : 2;
+		const chromaColor = chroma(color)[this.colorSpace]();
+
+		chromaColor[hueIndex] += angle;
+		return chroma(chromaColor, this.colorSpace);
 	}
 }
 

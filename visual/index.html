@@ -454,7 +454,7 @@
 		</script>
 		<script type="module">
 			class Harmony {
-				constructor(space = 'lab', correctLightness = false) {
+				constructor(space = 'hsl', correctLightness = false) {
 					this.space = space;
 					this.correctLightness = correctLightness;
 				}
@@ -615,7 +615,7 @@
 					return chroma(chromaColor, this.colorSpace);
 				}
 			}
-			
+
 			const harmony = new Harmony('hsl', true);
 			let mode = 'sequential';
 			let mainColor = 'red';
@@ -640,6 +640,7 @@
   			e.target.style.background = 'linear-gradient(to right, var(--main-color) 0%, var(--main-color) ' + value + '%, #fff ' + value + '%, white 100%)'
 				updateColor();
 			});
+			document.querySelectorAll('input[name="palette"]')[0].checked = true;
 			document.querySelectorAll('input[name="palette"]').forEach((elm) =>
 				elm.addEventListener('change', (e) => {
 					mode = e.target.value;
@@ -647,6 +648,7 @@
 					updateColor();
 				})
 			);
+			document.querySelectorAll('input[name="color-space"]')[0].checked = true;
 			document.querySelectorAll('input[name="color-space"]').forEach((elm) =>
 				elm.addEventListener('change', (e) => {
 					harmony.space = e.target.value.toLowerCase();
