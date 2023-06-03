@@ -14,6 +14,17 @@ Or Generate more general color palettes using simple color harmonies like comple
 Since this library uses `chroma-js` objects for color manipulations, we gain full advantage of advanced
 color spaces for manipulating colors to generate automatic color palettes.
 
+For example, a Triadic color harmony with a Red/Green/Blue may look like this using the generic HSL workflow:
+![A triadic Red/Green/Blue harmony](https://raw.githubusercontent.com/beilinson/chroma-harmony.js/main/assets/triadic_hsl.png)
+
+And like this using the CSS4 `oklch` color space:
+![A triadic Red/Green/Blue harmony in oklch](https://raw.githubusercontent.com/beilinson/chroma-harmony.js/main/assets/triadic_oklch.png)
+
+If using in a data visualization context, choosing the `oklch` triad may be preferred, as can be clearly seen in the following comparison where the `hsl` trid (on the left) makes the blue bars stand out much more against the red and green.
+This is in contrast to the `oklch` triad (on the right), where no color is visually stronger than the other 2.
+
+![A triadic Red/Green/Blue harmony in hsl](https://raw.githubusercontent.com/beilinson/chroma-harmony.js/main/assets/triadic_hsl_demo.png) ![A triadic Red/Green/Blue harmony in oklch](https://raw.githubusercontent.com/beilinson/chroma-harmony.js/main/assets/triadic_oklch_demo.png)
+
 ## Install
 First install the `chroma-js` peer-dependency:
 ```

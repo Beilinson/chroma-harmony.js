@@ -53,6 +53,7 @@
 			}
 
 			label {
+				cursor: pointer;
 				font-family: system-ui, sans-serif;
 				line-height: 1.1;
 				display: grid;
@@ -389,15 +390,15 @@
 					LCH
 				</label>
 				<label>
-					<input type="radio" name="color-space" value="LAB" />
-					LAB
+					<input type="radio" name="color-space" value="OKLCH" />
+					OKLCH
 				</label>
 				<select id="color-space-input" style="display: none">
 					<option value="hsl">HSL</option>
 					<option value="hsv">HSV</option>
 					<option value="rgb">RGB</option>
 					<option value="lch">LCH</option>
-					<option value="lab">LAB</option>
+					<option value="oklch">OKLCH</option>
 				</select>
 			</div>
 			<div id="subdivisions" class="flex-column">
@@ -490,8 +491,7 @@
 					count = Math.ceil(count);
 					if (count < 2) return [chroma(color)];
 					if (count == 2) {
-						const [h,s,l] = chroma(color).hsl();
-						return [chroma(color), chroma(h - 180, s, l, 'hsl')];
+						return [chroma(color), this.shiftHue(color, 180)];
 					}
 					if (count == 3) return this.triadic(color);
 					if (count == 4) return this.tetradic(color);
@@ -527,14 +527,11 @@
 				 * @returns an analogous color palette of n Chroma Colors
 				 */
 				 analogous(color, count = 5, angle = 15) {
-					const startHsl = chroma(color).hsl();
-					startHsl[0] -= angle;
+					const startChroma = this.shiftHue(color, -angle);
 					const colors = [];
 					const angleInterval = (angle * 2) / (count - 1);
 					for (let i = 0; i < count; i++) {
-						const hsl = [...startHsl];
-						hsl[0] += angleInterval * i;
-						colors.push(chroma(hsl, 'hsl'));
+						colors.push(this.shiftHue(startChroma, angleInterval * i));
 					}
 					return colors;
 				}
@@ -563,8 +560,6 @@
 				 */
 				splitComplementary(color, angle = 150) {
 					return this.analogous(color, 3, angle);
-					const [h, s, l] = chroma(color).hsl();
-					return [chroma(h - angle, s, l, 'hsl'), chroma(color), chroma(h + angle, s, l, 'hsl')];
 				}
 
 				/**
@@ -582,10 +577,7 @@
 				 * @returns a tetradic color palette of 4 Chroma Colors
 				 */
 				tetradic(color) {
-					const chromaColor = chroma(color);
-					const [h, s, l] = chromaColor.hsl();
-
-					return [chromaColor, chroma(h + 60, s, l, 'hsl'), chroma(h + 180, s, l, 'hsl'), chroma(h + 240, s, l, 'hsl')];
+					return [chroma(color), this.shiftHue(color, 60), this.shiftHue(color, 180), this.shiftHue(color, 240)];
 				}
 
 				/**
@@ -594,22 +586,42 @@
 				 * @returns a square color palette of 4 Chroma Colors
 				 */
 				square(color) {
-					const chromaColor = chroma(color);
-					const [h, s, l] = chromaColor.hsl();
-
-					return [chromaColor, chroma(h + 90, s, l, 'hsl'), chroma(h + 180, s, l, 'hsl'), chroma(h + 270, s, l, 'hsl')];
+					return [chroma(color), this.shiftHue(color, 90), this.shiftHue(color, 180), this.shiftHue(color, 270)];
 				}
 
 				scale(colors) {
 					return chroma.scale(colors).cache(false).mode(this.space);
 				}
+
+				get colorSpace() {
+					switch(this.space) {
+						case 'lab':
+						case 'lch':
+						case 'hcl':
+							return 'lch';
+						case 'oklch':
+						case 'oklab':
+							return 'oklch';
+						default:
+						  return 'hsl';
+					}
+				}
+
+				shiftHue(color, angle) {
+					const hueIndex = this.colorSpace === 'hsl' ? 0 : 2;
+					const chromaColor = chroma(color)[this.colorSpace]();
+					
+					chromaColor[hueIndex] += angle;
+					return chroma(chromaColor, this.colorSpace);
+				}
 			}
+			
 			const harmony = new Harmony('hsl', true);
 			let mode = 'sequential';
 			let mainColor = 'red';
 			let count = 5;
 			let angle = 15;
-			document.getElementById('color-input').addEventListener('change', (e) => {
+			document.getElementById('color-input').addEventListener('input', (e) => {
 				mainColor = e.target.value;
 				document.querySelector(':root').style.setProperty('--main-color', mainColor);
 				updateColor();
@@ -638,7 +650,6 @@
 			document.querySelectorAll('input[name="color-space"]').forEach((elm) =>
 				elm.addEventListener('change', (e) => {
 					harmony.space = e.target.value.toLowerCase();
-					updateParams();
 					updateColor();
 				})
 			);
