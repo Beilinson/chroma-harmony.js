@@ -370,7 +370,7 @@
 		</div>
 		<div id="example"></div>
 		<div id="options">
-			<color-picker id="color-input" value="#ff0000" formats="hex,rgb,hsl,hsv" selectedformat="hex"></color-picker>
+			<color-picker id="color-input" value="#ff0000" formats="hex,rgb,hsl,hsv" selectedformat="hex" no_alpha="true"></color-picker>
 			<div id="color-space">
 				<h3>Interpolation Mode</h3>
 				<label>
@@ -410,7 +410,6 @@
 				<div>10<input type="range" id="angle-input" min="10" max="180" value="15" />180</div>
 			</div>
 		</div>
-		<!-- <input type="color" id="color-input" /> -->
 		<div id="canvas-bin"></div>
 		<script>
 			let theme = 'dark';
@@ -622,6 +621,11 @@
 			let count = 5;
 			let angle = 15;
 			document.getElementById('color-input').addEventListener('input', (e) => {
+				mainColor = e.target.value;
+				document.querySelector(':root').style.setProperty('--main-color', mainColor);
+				updateColor();
+			});
+			document.getElementById('color-input').addEventListener('change', (e) => {
 				mainColor = e.target.value;
 				document.querySelector(':root').style.setProperty('--main-color', mainColor);
 				updateColor();
