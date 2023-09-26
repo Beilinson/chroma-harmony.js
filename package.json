@@ -1,12 +1,12 @@
 {
 	"name": "chroma-harmony",
-	"version": "0.0.4",
+	"version": "0.1.0",
 	"description": "A minimal Color Harmony library built on top of [Chroma.js](https://www.npmjs.com/package/chroma-js)",
 	"type": "module",
 	"main": "dist/index.js",
-	"module": "lib/index.js",
-	"typings": "lib/index.d.ts",
-	"types": "lib/index.d.ts",
+	"module": "dist/index.js",
+	"typings": "dist/index.d.ts",
+	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "rimraf dist && tsc && rollup -c rollup.config.js",
 		"prepublishOnly": "npm run build"
